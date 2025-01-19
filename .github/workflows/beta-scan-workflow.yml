@@ -1,0 +1,36 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+  pull_request:
+    branches:
+      - '*'
+      - '!main'
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t security_cicd:beta .
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: 'security_cicd:beta'
+          vuln-type: 'os,library'
+          format: 'table'
+
+      - name: Install Semgrep
+        run: |
+          sudo pip install semgrep --ignore-installed rich
+      - name: Run Semgrep SAST
+        run: |
+          semgrep --config p/security-audit --error --json .
