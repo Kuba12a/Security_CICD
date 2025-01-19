@@ -30,3 +30,19 @@ jobs:
       - name: Run Semgrep SAST
         run: |
           semgrep --config p/security-audit --error --json .
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run tests
+        run: mvn test -B
