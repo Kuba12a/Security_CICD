@@ -207,3 +207,4 @@ Oceniany jest PR, który zawiera:
 * JWT application - [GitHub Repo](https://github.com/onsecru/jwt-hacking-challenges)
 
 pozdrawiam
+smacznej kawusi
