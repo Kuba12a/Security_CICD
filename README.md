@@ -205,3 +205,5 @@ Oceniany jest PR, który zawiera:
 * Java application - [GitHub Repo](https://github.com/pedrohenriquelacombe/spring-thymeleaf-crud-example)
 * Python application - [GitHub Repo](https://github.com/MohammadSatel/Flask_Book_Library)
 * JWT application - [GitHub Repo](https://github.com/onsecru/jwt-hacking-challenges)
+
+pozdrawiam
