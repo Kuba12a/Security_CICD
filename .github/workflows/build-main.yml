@@ -3,20 +3,19 @@ name: Security Scan
 on:
   push:
     branches:
-      - 'main'
+      - '*'
+      - '!main'
 
 jobs:
-  security-tests:
+  security-tests-trivy:
     runs-on: ubuntu-latest
-
+    name: Run Trivy scan
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v4
       - name: Build Docker image
         run: |
           docker build -t security_cicd:latest .
-
       - name: Run Trivy scan
         uses: aquasecurity/trivy-action@0.29.0
         with:
@@ -24,30 +23,38 @@ jobs:
           vuln-type: 'os,library'
           format: 'table'
 
+  seurity-tests-semgrep:
+    runs-on: ubuntu-latest
+    name: Run Semgrep scan
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Install Semgrep
-        run: |
-          sudo pip install semgrep --ignore-installed rich
-
+          run: |
+            sudo pip install semgrep --ignore-installed rich
       - name: Run Semgrep SAST
-        run: |
-          semgrep --config p/security-audit --error --json .
+          run: |
+            semgrep --config p/security-audit --error --json .
 
+  seurity-tests-owasp-zap:
+    runs-on: ubuntu-latest
+    name: Run OWASP ZAP scan
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build -t security_cicd:latest .
       - name: Start Docker container with application
         run: |
-          docker network create zap-net
-          docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:latest
-
-      - name: Scan the webapplication for DAST
-        steps:
-          - name: Checkout
-            uses: actions/checkout@v4
-          - name: ZAP Scan
-            uses: zaproxy/action-baseline@v0.12.0
-            with:
-              target: 'http://localhost:8080'
-              allow_issue_writing: false
-              fail_action: true
-              cmd_options: '-a'
+          docker run -d --name security_app -p 8080:8080 security_cicd:latest
+      - name: ZAP Scan
+          uses: zaproxy/action-baseline@v0.12.0
+          with:
+            target: 'http://localhost:8080'
+            allow_issue_writing: false
+            fail_action: true
+            cmd_options: '-a'
 
   test:
     runs-on: ubuntu-latest
