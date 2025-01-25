@@ -30,11 +30,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Install Semgrep
-          run: |
-            sudo pip install semgrep --ignore-installed rich
+        run: |
+          sudo pip install semgrep --ignore-installed rich
       - name: Run Semgrep SAST
-          run: |
-            semgrep --config p/security-audit --error --json .
+        run: |
+          semgrep --config p/security-audit --error --json .
 
   seurity-tests-owasp-zap:
     runs-on: ubuntu-latest
@@ -58,7 +58,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
