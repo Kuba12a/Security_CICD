@@ -31,6 +31,16 @@ jobs:
         run: |
           semgrep --config p/security-audit --error --json .
 
+      - name: Start Docker container with application
+        run: |
+          docker run -d --name security_app -p 8080:8080 security_cicd:beta
+
+      - name: Start OWASP ZAP scan
+        run: |
+          docker run -u zap -p 8089:8081 -v $(pwd):/zap/wrk/:rw -i zaproxy/zap-stable zap-baseline.py \
+            -t http://host.docker.internal:8080 \
+            -r zap_report.html
+
   test:
     runs-on: ubuntu-latest
 
