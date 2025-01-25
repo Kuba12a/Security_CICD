@@ -33,7 +33,7 @@ jobs:
 
       - name: Start Docker container with application
         run: |
-          docker run -d --name security_app -p 8080:8080 security_cicd:latest
+          docker network create zap-net
           docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:latest
 
       - name: Start OWASP ZAP scan
