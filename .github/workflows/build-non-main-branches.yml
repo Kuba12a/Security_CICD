@@ -51,8 +51,8 @@ jobs:
 
       - name: Curl
         run: |
-        docker ps
-        docker exec zap_app curl http://security_app:8080/
+          docker ps
+          docker exec zap_app curl http://security_app:8080/
 
   test:
     runs-on: ubuntu-latest
