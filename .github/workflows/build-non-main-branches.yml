@@ -39,14 +39,17 @@ jobs:
       - name: Test curl
         run: |
           docker ps
-          curl http://security_app:8080/
 
       - name: Start OWASP ZAP scan
         run: |
-          docker run -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
+          docker run --name zap_app -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
             -t http://security_app:8080 \
             -r zap_report.html \
             -d \
+
+      - name: Curl
+        run: |
+          docker exec zap_app curl http://security_app:8080
 
       - name: Upload OWASP ZAP report
         uses: actions/upload-artifact@v3
