@@ -35,28 +35,24 @@ jobs:
         run: |
           docker network create zap-net
           docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:beta
-          docker run --name zap_app -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
+
+      - name: Start OWASP ZAP scan
+        run: |
+          docker run -d -v --name zap_app $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
             -t http://security_app:8080 \
             -r zap_report.html \
             -d \
 
-      - name: Test curl
-        run: |
-          docker ps
-
-      - name: Start OWASP ZAP scan
-        run: |
-
+          - name: Upload OWASP ZAP report
+            uses: actions/upload-artifact@v3
+            with:
+              name: zap-report
+              path: zap_report.html
 
       - name: Curl
         run: |
-          docker exec zap_app curl http://security_app:8080
-
-      - name: Upload OWASP ZAP report
-        uses: actions/upload-artifact@v3
-        with:
-          name: zap-report
-          path: zap_report.html
+        docker ps
+        docker exec zap_app curl http://security_app:8080/
 
   test:
     runs-on: ubuntu-latest
