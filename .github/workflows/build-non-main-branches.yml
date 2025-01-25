@@ -34,7 +34,11 @@ jobs:
       - name: Start Docker container with application
         run: |
           docker network create zap-net
-          docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:beta
+          docker run --name security_app --network zap-net -p 8080:8080 security_cicd:beta
+          docker run --name zap_app -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
+            -t http://security_app:8080 \
+            -r zap_report.html \
+            -d \
 
       - name: Test curl
         run: |
@@ -42,10 +46,7 @@ jobs:
 
       - name: Start OWASP ZAP scan
         run: |
-          docker run --name zap_app -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
-            -t http://security_app:8080 \
-            -r zap_report.html \
-            -d \
+
 
       - name: Curl
         run: |
