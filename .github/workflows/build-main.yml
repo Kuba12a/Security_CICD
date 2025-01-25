@@ -16,6 +16,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t security_cicd:latest .
+
       - name: Run Trivy scan
         uses: aquasecurity/trivy-action@0.29.0
         with:
@@ -36,23 +37,17 @@ jobs:
           docker network create zap-net
           docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:latest
 
-      - name: Test curl
-        run: |
-          docker ps
-          curl http://security_app:8080/
-
-      - name: Start OWASP ZAP scan
-        run: |
-          docker run -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
-            -t http://security_app:8080 \
-            -r zap_report.html \
-            -d \
-
-      - name: Upload OWASP ZAP report
-        uses: actions/upload-artifact@v3
-        with:
-          name: zap-report
-          path: zap_report.html
+      - name: Scan the webapplication for DAST
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+          - name: ZAP Scan
+            uses: zaproxy/action-baseline@v0.12.0
+            with:
+              target: 'http://localhost:8080'
+              allow_issue_writing: false
+              fail_action: true
+              cmd_options: '-a'
 
   test:
     runs-on: ubuntu-latest
