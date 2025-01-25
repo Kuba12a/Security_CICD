@@ -75,7 +75,7 @@ jobs:
 
   build-and-publish:
     name: Build and publish beta image
-    needs: [ security-tests-trivy, seurity-tests-semgrep, seurity-tests-owasp-zap ]
+    needs: [ security-tests-trivy, seurity-tests-semgrep, seurity-tests-owasp-zap, test ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
