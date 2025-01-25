@@ -22,6 +22,8 @@ jobs:
           image-ref: 'security_cicd:beta'
           vuln-type: 'os,library'
           format: 'table'
+          exit-code: '1'
+          severity: 'MEDIUM,HIGH,CRITICAL'
 
   seurity-tests-semgrep:
     runs-on: ubuntu-latest
