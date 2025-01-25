@@ -38,7 +38,7 @@ jobs:
 
       - name: Start OWASP ZAP scan
         run: |
-          docker run -v $(pwd):/zap/wrk/:rw --user root owasp/zap2docker-stable zap-full-scan.py \
+          docker run -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
             -t http://security_app:8080 \
             -r zap_report.html \
 
