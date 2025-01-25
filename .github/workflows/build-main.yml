@@ -3,8 +3,7 @@ name: Security Scan
 on:
   push:
     branches:
-      - '*'
-      - '!main'
+      - 'main'
 
 jobs:
   security-tests-trivy:
@@ -75,6 +74,7 @@ jobs:
 
   build-and-publish:
     name: Build and publish latest image
+    needs: [ security-tests-trivy, seurity-tests-semgrep, seurity-tests-owasp-zap ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
