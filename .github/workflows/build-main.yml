@@ -36,6 +36,11 @@ jobs:
           docker network create zap-net
           docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:latest
 
+      - name: Test curl
+        run: |
+          docker ps
+          curl http://security_app:8080/
+
       - name: Start OWASP ZAP scan
         run: |
           docker run -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
