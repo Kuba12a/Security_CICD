@@ -41,6 +41,13 @@ jobs:
           docker run -v $(pwd):/zap/wrk/:rw --user root zaproxy/zap-stable zap-full-scan.py \
             -t http://security_app:8080 \
             -r zap_report.html \
+            -d \
+
+      - name: Upload OWASP ZAP report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: zap_report.html
 
   test:
     runs-on: ubuntu-latest
