@@ -31,6 +31,11 @@ jobs:
         run: |
           semgrep --config p/security-audit --error --json .
 
+      - name: Start Docker container with application
+        run: |
+          docker network create zap-net
+          docker run -d --name security_app --network zap-net -p 8080:8080 security_cicd:beta
+
       - name: Checkout
         uses: actions/checkout@v4
       - name: ZAP Scan
@@ -40,7 +45,7 @@ jobs:
           allow_issue_writing: false
           fail_action: true
           cmd_options: '-a'
-          
+
       - name: Upload OWASP ZAP report
         uses: actions/upload-artifact@v3
         with:
