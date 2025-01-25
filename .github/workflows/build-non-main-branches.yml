@@ -31,6 +31,25 @@ jobs:
         run: |
           semgrep --config p/security-audit --error --json .
 
+      # OWASP ZAP
+      - name: Pull OWASP ZAP Docker image
+        run: |
+          docker pull owasp/zap2docker-stable
+      - name: Start Docker container with application
+        run: |
+          docker run -d --name security_app -p 8080:8080 security_cicd:latest
+      - name: Start OWASP ZAP scan
+        run: |
+          docker run --rm -v $(pwd):/zap/wrk:rw -t owasp/zap2docker-stable zap-baseline.py \
+            -t http://localhost:8080 \
+            -r zap_report.html \
+            -d
+      - name: Upload OWASP ZAP report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: SecurityReports/zap_report.html
+
   test:
     runs-on: ubuntu-latest
 
