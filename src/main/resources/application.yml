@@ -1,0 +1,7 @@
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+        http-only: false
+        same-site: None
