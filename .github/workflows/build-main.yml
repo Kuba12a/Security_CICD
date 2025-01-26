@@ -6,13 +6,12 @@ on:
       - 'main'
 
 jobs:
-  security-tests:
+  security-tests-trivy:
     runs-on: ubuntu-latest
-
+    name: Run Trivy scan
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v4
       - name: Build Docker image
         run: |
           docker build -t security_cicd:latest .
@@ -22,7 +21,15 @@ jobs:
           image-ref: 'security_cicd:latest'
           vuln-type: 'os,library'
           format: 'table'
+          exit-code: '1'
+          severity: 'MEDIUM,HIGH,CRITICAL'
 
+  seurity-tests-semgrep:
+    runs-on: ubuntu-latest
+    name: Run Semgrep scan
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Install Semgrep
         run: |
           sudo pip install semgrep --ignore-installed rich
@@ -30,9 +37,28 @@ jobs:
         run: |
           semgrep --config p/security-audit --error --json .
 
+  seurity-tests-owasp-zap:
+    runs-on: ubuntu-latest
+    name: Run OWASP ZAP scan
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build -t security_cicd:latest .
+      - name: Start Docker container with application
+        run: |
+          docker run -d --name security_app -p 8080:8080 security_cicd:latest
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:8080'
+          allow_issue_writing: false
+          fail_action: true
+          cmd_options: '-a'
+
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
@@ -45,3 +71,27 @@ jobs:
 
       - name: Run tests
         run: mvn test -B
+
+  build-and-publish:
+    name: Build and publish latest image
+    needs: [ security-tests-trivy, seurity-tests-semgrep, seurity-tests-owasp-zap, test ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/tbo-project:latest
